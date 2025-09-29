@@ -35,7 +35,7 @@ public class BotcCharacterArgument implements CustomArgumentType.Converted<BotcC
     }
 
     @Override
-    public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, @NotNull SuggestionsBuilder builder) {
         for (BotcCharacter character : BotcCharacter.values()) {
             String name = character.toString().toLowerCase();
 

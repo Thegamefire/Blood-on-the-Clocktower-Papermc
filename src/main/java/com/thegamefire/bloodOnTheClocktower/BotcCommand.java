@@ -10,14 +10,13 @@ import com.thegamefire.bloodOnTheClocktower.characters.BotcCharacterArgument;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.BlockPositionResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,6 +40,13 @@ public class BotcCommand {
                         .then(Commands.argument("player", ArgumentTypes.player())
                                 .then(Commands.argument("character", new BotcCharacterArgument())
                                         .executes(BotcCommand::giveCharacter))))
+                .then(Commands.literal("set-voteblock")
+                        .then(Commands.argument("location", ArgumentTypes.blockPosition())
+                                .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
+                                        .executes(BotcCommand::setVoteBlock))))
+                .then(Commands.literal("remove-voteblock")
+                        .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
+                                .executes(BotcCommand::removeVoteBlock)))
                 .build();
     }
 
@@ -53,7 +59,7 @@ public class BotcCommand {
 
     private static int setStoryteller(CommandContext<CommandSourceStack> ctx) {
         Entity executor = ctx.getSource().getExecutor();
-        if ( executor instanceof Player player) {
+        if (executor instanceof Player player) {
             PlayerManager.setStoryteller(player);
         } else {
             ctx.getSource().getSender().sendMessage(Component.text("No player specified"));
@@ -83,6 +89,19 @@ public class BotcCommand {
                         .decoration(TextDecoration.ITALIC, false));
         player.give(token);
 
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int setVoteBlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Location loc = ctx.getArgument("location", BlockPositionResolver.class).resolve(ctx.getSource()).toLocation(Bukkit.getWorld("world"));
+        int playerNr = IntegerArgumentType.getInteger(ctx, "player_number");
+        VoteManager.addVoteBlock(playerNr, loc);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int removeVoteBlock(CommandContext<CommandSourceStack> ctx) {
+        int playerNr = IntegerArgumentType.getInteger(ctx, "player_number");
+        VoteManager.removeVoteBlock(playerNr);
         return Command.SINGLE_SUCCESS;
     }
 

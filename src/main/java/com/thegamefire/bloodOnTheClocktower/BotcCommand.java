@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.thegamefire.bloodOnTheClocktower.characters.BotcCharacter;
 import com.thegamefire.bloodOnTheClocktower.characters.BotcCharacterArgument;
+import com.thegamefire.bloodOnTheClocktower.votes.VoteManager;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -16,8 +17,10 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.*;
-import org.bukkit.entity.Entity;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -26,28 +29,45 @@ public class BotcCommand {
 
     public static LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("botc")
-                .then(Commands.literal("set-storyteller")
-                        .requires(sender -> sender.getSender().hasPermission("botc.manage-game"))
-                        .executes(BotcCommand::setStoryteller)
-                        .then(Commands.argument("storyteller", ArgumentTypes.player())
-                                .executes(BotcCommand::setOtherStoryteller)))
-                .then(Commands.literal("assign")
-                        .requires(sender -> sender.getSender().hasPermission("botc.manage-game"))
-                        .then(Commands.argument("player", ArgumentTypes.player())
-                                .then(Commands.argument("house_number", IntegerArgumentType.integer(0))
-                                        .executes(BotcCommand::assignHouse))))
-                .then(Commands.literal("give-character")
-                        .then(Commands.argument("player", ArgumentTypes.player())
-                                .then(Commands.argument("character", new BotcCharacterArgument())
-                                        .executes(BotcCommand::giveCharacter))))
-                .then(Commands.literal("set-voteblock")
-                        .then(Commands.argument("location", ArgumentTypes.blockPosition())
-                                .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
-                                        .executes(BotcCommand::setVoteBlock))))
-                .then(Commands.literal("remove-voteblock")
-                        .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
-                                .executes(BotcCommand::removeVoteBlock)))
+                .then(Commands.literal("players")
+                        .then(Commands.literal("assign")
+                                .then(Commands.argument("player", ArgumentTypes.player())
+                                        .then(Commands.argument("house_number", IntegerArgumentType.integer(0))
+                                                .executes(BotcCommand::assignHouse))
+                                        .then(Commands.literal("storyteller")
+                                                .executes(BotcCommand::setStoryteller))))
+                        .then(Commands.literal("give-character")
+                                .then(Commands.argument("player", ArgumentTypes.player())
+                                        .then(Commands.argument("character", new BotcCharacterArgument())
+                                                .executes(BotcCommand::giveCharacter))))
+                        .then(Commands.literal("vote")
+                                .then(Commands.literal("nominate")
+                                        .then(Commands.argument("player", ArgumentTypes.player())
+                                                .executes(BotcCommand::nominate)))
+                                .then(Commands.literal("start")
+                                        .executes(BotcCommand::startVote))
+                                .then(Commands.literal("execute"))))
+                .then(Commands.literal("setup")
+                        .then(Commands.literal("voteblock")
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("location", ArgumentTypes.blockPosition())
+                                                .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
+                                                        .executes(BotcCommand::setVoteBlock))))
+                                .then(Commands.literal("remove")
+                                        .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
+                                                .executes(BotcCommand::removeVoteBlock)))))
                 .build();
+    }
+
+    private static int startVote(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        VoteManager.startVote();
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int nominate(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
+        VoteManager.nominatePlayer(player);
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int assignHouse(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -57,18 +77,9 @@ public class BotcCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int setStoryteller(CommandContext<CommandSourceStack> ctx) {
-        Entity executor = ctx.getSource().getExecutor();
-        if (executor instanceof Player player) {
-            PlayerManager.setStoryteller(player);
-        } else {
-            ctx.getSource().getSender().sendMessage(Component.text("No player specified"));
-        }
-        return Command.SINGLE_SUCCESS;
-    }
 
-    private static int setOtherStoryteller(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        Player storyteller = ctx.getArgument("storyteller", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
+    private static int setStoryteller(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player storyteller = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
         PlayerManager.setStoryteller(storyteller);
         return Command.SINGLE_SUCCESS;
     }

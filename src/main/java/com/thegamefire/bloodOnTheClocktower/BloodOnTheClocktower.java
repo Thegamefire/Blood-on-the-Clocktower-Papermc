@@ -39,12 +39,16 @@ public final class BloodOnTheClocktower extends JavaPlugin {
         VoteManager.saveVoteBlocks();
     }
 
+    public static void sendGlobal(Component message) {
+        Bukkit.getWorld("world").sendMessage(message);
+    }
+
     public static void debugPublic(String to_be_sent) {
         Bukkit.getWorld("world").sendMessage(
                 Component.text("[BOTC_DEBUG] ")
                         .color(NamedTextColor.LIGHT_PURPLE)
                         .decorate(TextDecoration.BOLD)
-                .append(Component.text(to_be_sent).color(NamedTextColor.WHITE).decoration(TextDecoration.BOLD, false))
+                        .append(Component.text(to_be_sent).color(NamedTextColor.WHITE).decoration(TextDecoration.BOLD, false))
         );
     }
 }

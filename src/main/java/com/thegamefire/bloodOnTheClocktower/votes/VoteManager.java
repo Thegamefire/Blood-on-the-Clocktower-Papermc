@@ -2,12 +2,13 @@ package com.thegamefire.bloodOnTheClocktower.votes;
 
 import com.thegamefire.bloodOnTheClocktower.BloodOnTheClocktower;
 import com.thegamefire.bloodOnTheClocktower.PlayerManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -33,6 +34,12 @@ public class VoteManager {
     public static void nominatePlayer(Player player) {
         nominee = player;
         player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, PotionEffect.INFINITE_DURATION, 2, false, false, false));
+        BloodOnTheClocktower.sendGlobal(
+                player.displayName()
+                        .append(Component.text(" has been nominated.")));
+        BloodOnTheClocktower.sendGlobal(
+                Component.text(getNecessaryVoteAmount()).color(NamedTextColor.AQUA)
+                        .append(Component.text(" votes are necessary to mark for execution.").color(NamedTextColor.WHITE)));
     }
 
     public static void newDay() {
@@ -42,6 +49,7 @@ public class VoteManager {
             location.clone().add(0, -2, 0).getBlock().setType(Material.REDSTONE_BLOCK);
         }
     }
+
     public static void resetGame() {
         newDay();
         BloodOnTheClocktower.taskScheduler.runTaskLater(BloodOnTheClocktower.instance, () -> {
@@ -55,22 +63,21 @@ public class VoteManager {
      * Lowers the next VoteBlock in the Animation
      */
     public static void voteAnimationStep() {
-        BloodOnTheClocktower.debugPublic("Next ANimation Step: "+ voteBlockAnimationStepIndex );
+        BloodOnTheClocktower.debugPublic("Next ANimation Step: " + voteBlockAnimationStepIndex);
 
         int nomineeNr = PlayerManager.getHouseNr(nominee);
         Optional<Integer> maxVoteBlock = voteBlocks.keySet().stream().max(Integer::compareTo);
 
-        BloodOnTheClocktower.debugPublic("last vote block is "+maxVoteBlock.get());
+        BloodOnTheClocktower.debugPublic("last vote block is " + maxVoteBlock.get());
 
-        Location nextVoteBlock = voteBlocks.get((nomineeNr+voteBlockAnimationStepIndex+1)%(maxVoteBlock.get()+1));
+        Location nextVoteBlock = voteBlocks.get((nomineeNr + voteBlockAnimationStepIndex + 1) % (maxVoteBlock.get() + 1));
         if (nextVoteBlock == null) { // Vote blocks skip a number, e.g. the houses 1, 2 and 4 exist but 3 doesn't
-                voteBlockAnimationStepIndex++;
-                voteAnimationStep();
-        } else if ((voteBlockAnimationStepIndex)>=maxVoteBlock.get()) { // Vote has gone around whole circle
+            voteBlockAnimationStepIndex++;
+            voteAnimationStep();
+        } else if ((voteBlockAnimationStepIndex) >= maxVoteBlock.get()) { // Vote has gone around whole circle
             voteBlockAnimationStepIndex = -1;
             endVote();
-        }
-        else { // Base Case, a vote get's processed
+        } else { // Base Case, a vote get's processed
             Block block = nextVoteBlock.clone().add(0, 1, 0).getBlock();
             if (VoteType.onBlockSet().contains(block.getType())) {
                 block.setType(
@@ -86,20 +93,33 @@ public class VoteManager {
     }
 
     private static void endVote() {
-        if (nomineeScore > executeeScore && nomineeScore>= (PlayerManager.getPlayerNrs().size() /2)) {
+        boolean marked = nomineeScore > executeeScore && nomineeScore >= (PlayerManager.getPlayerNrs().size() / 2);
+        BloodOnTheClocktower.sendGlobal(
+                Component.text(nomineeScore).color(marked ? NamedTextColor.GREEN : NamedTextColor.RED)
+                        .append(Component.text(" is "))
+                        .append(Component.text(marked ? "" : "not"))
+                        .append(Component.text(" enough to mark for execution.")));
+        if (marked) {
             executee = nominee;
             executeeScore = nomineeScore;
-            nominee = null;
-            nomineeScore = 0;
-            BloodOnTheClocktower.debugPublic("Executee = "+executee);
+            BloodOnTheClocktower.sendGlobal(executee.displayName().append(Component.text(" has been marked for execution.")));
+        } else if (nomineeScore == executeeScore && executee != null) {
+            BloodOnTheClocktower.sendGlobal(executee.displayName().append(Component.text(" is no longer marked for execution.")));
+            executee = null;
         }
+        nominee = null;
+        nomineeScore = 0;
     }
 
     public static void startVote() {
         voteBlockAnimationStepIndex = 0;
+        BloodOnTheClocktower.sendGlobal(Component.text("Starting Vote"));
         //TODO Make sure at start of game non participating players get SPENT_GHOST_VOTE Blocks
     }
 
+    public static int getNecessaryVoteAmount() {
+        return Math.max(executeeScore + 1, PlayerManager.getPlayerNrs().size() / 2);
+    }
 
     public static void addVoteBlock(int playerNr, Location location) {
         voteBlocks.put(playerNr, location);
@@ -119,6 +139,7 @@ public class VoteManager {
 
     /**
      * Loads the saved VoteBlock Locations from the save
+     *
      * @return Locations of the Vote Block saved in the world for each Player
      */
     public static Map<Integer, Location> loadVoteBlocks() {

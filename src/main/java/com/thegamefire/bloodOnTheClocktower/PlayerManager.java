@@ -9,7 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PlayerManager {
 
@@ -87,6 +89,18 @@ public class PlayerManager {
             }
         }
         return output;
+    }
+
+    public static Set<Player> getPlayers() {
+        Set<Player> players = new HashSet<>();
+        Objective objective = scoreboard.getObjective("botc_house_nr");
+        for (String entry : scoreboard.getEntries()) {
+            Score score = objective.getScore(entry);
+            if (score.isScoreSet()) {
+                players.add(Bukkit.getPlayer(entry));
+            }
+        }
+        return players;
     }
 
 

@@ -42,11 +42,11 @@ public final class BloodOnTheClocktower extends JavaPlugin {
     }
 
     public static void sendGlobal(Component message) {
-        Bukkit.getWorld("world").sendMessage(message);
+        Bukkit.getServer().sendMessage(message);
     }
 
     public static void debugPublic(String to_be_sent) {
-        Bukkit.getWorld("world").sendMessage(
+        Bukkit.getConsoleSender().sendMessage(
                 Component.text("[BOTC_DEBUG] ")
                         .color(NamedTextColor.LIGHT_PURPLE)
                         .decorate(TextDecoration.BOLD)

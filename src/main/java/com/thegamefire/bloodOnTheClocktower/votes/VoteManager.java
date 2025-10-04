@@ -71,11 +71,8 @@ public class VoteManager {
             return false;
         }
         voteBlock = voteBlock.clone().add(0, 1, 0);
-        BloodOnTheClocktower.debugPublic("voteBlockLocation is " + voteBlock);
         Material blockType = voteBlock.getBlock().getType();
-        BloodOnTheClocktower.debugPublic("Block is from type " + blockType);
         VoteType type = VoteType.fromBlock(blockType);
-        BloodOnTheClocktower.debugPublic("Vote is from type " + type);
         if (type != null) {
             Material voteOnBlock = type.getVoteOnBlock() == null ? type.getVoteOffBlock() : type.getVoteOnBlock();
             voteBlock.getBlock().setType(
@@ -92,12 +89,9 @@ public class VoteManager {
      * Lowers the next VoteBlock in the Animation
      */
     public static void voteAnimationStep() {
-        BloodOnTheClocktower.debugPublic("Next ANimation Step: " + voteBlockAnimationStepIndex);
 
         int nomineeNr = PlayerManager.getHouseNr(nominee);
         Optional<Integer> maxVoteBlock = voteBlocks.keySet().stream().max(Integer::compareTo);
-
-        BloodOnTheClocktower.debugPublic("last vote block is " + maxVoteBlock.get());
 
         Location nextVoteBlock = voteBlocks.get(((nomineeNr + voteBlockAnimationStepIndex + 1) % (maxVoteBlock.get() + 1)));
         if (nextVoteBlock == null) { // Vote blocks skip a number, e.g. the houses 1, 2 and 4 exist but 3 doesn't
@@ -117,7 +111,6 @@ public class VoteManager {
                 nomineeScore++;
             }
             nextVoteBlock.clone().add(0, -2, 0).getBlock().setType(Material.AIR);
-            BloodOnTheClocktower.debugPublic("Removing block at " + nextVoteBlock.clone().add(0, -2, 0));
             voteBlockAnimationStepIndex++;
         }
     }

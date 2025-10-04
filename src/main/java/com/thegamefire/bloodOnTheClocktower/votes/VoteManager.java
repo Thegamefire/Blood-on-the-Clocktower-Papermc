@@ -99,11 +99,11 @@ public class VoteManager {
 
         BloodOnTheClocktower.debugPublic("last vote block is " + maxVoteBlock.get());
 
-        Location nextVoteBlock = voteBlocks.get(((nomineeNr + voteBlockAnimationStepIndex + 1) % (maxVoteBlock.get() + 1)) + 1);
+        Location nextVoteBlock = voteBlocks.get(((nomineeNr + voteBlockAnimationStepIndex + 1) % (maxVoteBlock.get() + 1)));
         if (nextVoteBlock == null) { // Vote blocks skip a number, e.g. the houses 1, 2 and 4 exist but 3 doesn't
             voteBlockAnimationStepIndex++;
             voteAnimationStep();
-        } else if ((voteBlockAnimationStepIndex) >= maxVoteBlock.get()) { // Vote has gone around whole circle
+        } else if (voteBlockAnimationStepIndex > maxVoteBlock.get()) { // Vote has gone around whole circle
             voteBlockAnimationStepIndex = -1;
             endVote();
         } else { // Base Case, a vote gets processed

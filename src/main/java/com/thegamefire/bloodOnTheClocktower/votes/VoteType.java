@@ -17,8 +17,8 @@ public enum VoteType {
         return voteOffBlock;
     }
 
-    private Material voteOnBlock;
-    private Material voteOffBlock;
+    private final Material voteOnBlock;
+    private final Material voteOffBlock;
 
     VoteType(Material voteOffBlock, Material voteOnBlock) {
         this.voteOffBlock = voteOffBlock;

@@ -16,6 +16,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -24,6 +25,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Map;
 
 public class BotcCommand {
 
@@ -39,14 +42,14 @@ public class BotcCommand {
                         .then(Commands.literal("give-character")
                                 .then(Commands.argument("player", ArgumentTypes.player())
                                         .then(Commands.argument("character", new BotcCharacterArgument())
-                                                .executes(BotcCommand::giveCharacter))))
-                        .then(Commands.literal("vote")
-                                .then(Commands.literal("nominate")
-                                        .then(Commands.argument("player", ArgumentTypes.player())
-                                                .executes(BotcCommand::nominate)))
-                                .then(Commands.literal("start")
-                                        .executes(BotcCommand::startVote))
-                                .then(Commands.literal("execute"))))
+                                                .executes(BotcCommand::giveCharacter)))))
+                .then(Commands.literal("vote")
+                        .then(Commands.literal("nominate")
+                                .then(Commands.argument("player", ArgumentTypes.player())
+                                        .executes(BotcCommand::nominate)))
+                        .then(Commands.literal("start")
+                                .executes(BotcCommand::startVote))
+                        .then(Commands.literal("execute")))
                 .then(Commands.literal("setup")
                         .then(Commands.literal("voteblock")
                                 .then(Commands.literal("set")
@@ -55,8 +58,36 @@ public class BotcCommand {
                                                         .executes(BotcCommand::setVoteBlock))))
                                 .then(Commands.literal("remove")
                                         .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
-                                                .executes(BotcCommand::removeVoteBlock)))))
+                                                .executes(BotcCommand::removeVoteBlock)))
+                                .then(Commands.literal("list")
+                                        .executes(BotcCommand::listVoteBlocks)))
+                        .then(Commands.literal("votelever")
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("location", ArgumentTypes.blockPosition())
+                                                .then(Commands.argument("player_number", IntegerArgumentType.integer(0))
+                                                        .executes(BotcCommand::setVoteLever))))))
                 .build();
+    }
+
+    private static int setVoteLever(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Location loc = ctx.getArgument("location", BlockPositionResolver.class).resolve(ctx.getSource()).toLocation(Bukkit.getWorld("world"));
+        int playerNr = IntegerArgumentType.getInteger(ctx, "player_number");
+        VoteLeverListener.addVoteLever(loc, playerNr);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int listVoteBlocks(CommandContext<CommandSourceStack> ctx) {
+        Map<Integer, Location> voteBlocks = VoteManager.getVoteBlocks();
+        ctx.getSource().getSender().sendMessage(Component.text("Vote blocks are:", NamedTextColor.YELLOW));
+        for (int playerNr : voteBlocks.keySet()) {
+            Location loc = voteBlocks.get(playerNr);
+            ctx.getSource().getSender().sendMessage(
+                    Component.text(playerNr)
+                            .append(Component.text(": "))
+                            .append(Component.text(String.format("%g, %g, %g", loc.x(), loc.y(), loc.z())))
+            );
+        }
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int startVote(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

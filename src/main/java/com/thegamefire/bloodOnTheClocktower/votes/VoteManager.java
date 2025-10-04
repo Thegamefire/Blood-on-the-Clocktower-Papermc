@@ -35,7 +35,7 @@ public class VoteManager {
         nominee = player;
         player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, PotionEffect.INFINITE_DURATION, 2, false, false, false));
         BloodOnTheClocktower.sendGlobal(
-                player.displayName()
+                player.playerListName()
                         .append(Component.text(" has been nominated.")));
         BloodOnTheClocktower.sendGlobal(
                 Component.text(getNecessaryVoteAmount()).color(NamedTextColor.AQUA)
@@ -60,6 +60,35 @@ public class VoteManager {
     }
 
     /**
+     * Toggles whether the voteBlock of the specified player is on or off
+     *
+     * @param houseNr Number of the specified player
+     * @return Whether a voteBlock was found that could get toggled
+     */
+    public static boolean toggleVoteBlock(int houseNr) {
+        Location voteBlock = voteBlocks.get(houseNr);
+        if (voteBlock == null) {
+            return false;
+        }
+        voteBlock = voteBlock.clone().add(0, 1, 0);
+        BloodOnTheClocktower.debugPublic("voteBlockLocation is " + voteBlock);
+        Material blockType = voteBlock.getBlock().getType();
+        BloodOnTheClocktower.debugPublic("Block is from type " + blockType);
+        VoteType type = VoteType.fromBlock(blockType);
+        BloodOnTheClocktower.debugPublic("Vote is from type " + type);
+        if (type != null) {
+            Material voteOnBlock = type.getVoteOnBlock() == null ? type.getVoteOffBlock() : type.getVoteOnBlock();
+            voteBlock.getBlock().setType(
+                    (type.getVoteOnBlock() == blockType)
+                            ? type.getVoteOffBlock()
+                            : voteOnBlock
+            );
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Lowers the next VoteBlock in the Animation
      */
     public static void voteAnimationStep() {
@@ -70,14 +99,14 @@ public class VoteManager {
 
         BloodOnTheClocktower.debugPublic("last vote block is " + maxVoteBlock.get());
 
-        Location nextVoteBlock = voteBlocks.get((nomineeNr + voteBlockAnimationStepIndex + 1) % (maxVoteBlock.get() + 1));
+        Location nextVoteBlock = voteBlocks.get(((nomineeNr + voteBlockAnimationStepIndex + 1) % (maxVoteBlock.get() + 1)) + 1);
         if (nextVoteBlock == null) { // Vote blocks skip a number, e.g. the houses 1, 2 and 4 exist but 3 doesn't
             voteBlockAnimationStepIndex++;
             voteAnimationStep();
         } else if ((voteBlockAnimationStepIndex) >= maxVoteBlock.get()) { // Vote has gone around whole circle
             voteBlockAnimationStepIndex = -1;
             endVote();
-        } else { // Base Case, a vote get's processed
+        } else { // Base Case, a vote gets processed
             Block block = nextVoteBlock.clone().add(0, 1, 0).getBlock();
             if (VoteType.onBlockSet().contains(block.getType())) {
                 block.setType(
@@ -88,6 +117,7 @@ public class VoteManager {
                 nomineeScore++;
             }
             nextVoteBlock.clone().add(0, -2, 0).getBlock().setType(Material.AIR);
+            BloodOnTheClocktower.debugPublic("Removing block at " + nextVoteBlock.clone().add(0, -2, 0));
             voteBlockAnimationStepIndex++;
         }
     }
@@ -137,6 +167,10 @@ public class VoteManager {
         voteBlocks.remove(playerNr);
     }
 
+    public static Map<Integer, Location> getVoteBlocks() {
+        return voteBlocks;
+    }
+
     /**
      * Loads the saved VoteBlock Locations from the save
      *
@@ -146,7 +180,7 @@ public class VoteManager {
         World world = Bukkit.getWorld("world");
         Map<Integer, Location> locations = new HashMap<>();
         String conf = world.getPersistentDataContainer().get(NamespacedKey.fromString("vote_blocks", BloodOnTheClocktower.instance), PersistentDataType.STRING);
-        if (conf == null) {
+        if (conf == null || conf.isEmpty()) {
             return locations;
         }
         for (String locString : conf.split("§")) {

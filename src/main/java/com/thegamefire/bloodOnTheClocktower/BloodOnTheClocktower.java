@@ -25,6 +25,7 @@ public final class BloodOnTheClocktower extends JavaPlugin {
         Bukkit.getWorld("world").setGameRule(GameRule.KEEP_INVENTORY, true);
         playerManager = new PlayerManager();
         getServer().getPluginManager().registerEvents(new TokenPlaceListener(), this);
+        getServer().getPluginManager().registerEvents(new VoteLeverListener(), this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, command -> {
             Commands commands = command.registrar();
             commands.register(BotcCommand.createCommand());
@@ -37,6 +38,7 @@ public final class BloodOnTheClocktower extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         VoteManager.saveVoteBlocks();
+        VoteLeverListener.saveVoteLevers();
     }
 
     public static void sendGlobal(Component message) {

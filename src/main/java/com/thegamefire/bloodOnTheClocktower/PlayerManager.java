@@ -1,6 +1,5 @@
 package com.thegamefire.bloodOnTheClocktower;
 
-import com.thegamefire.bloodOnTheClocktower.votes.VoteManager;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,13 +29,18 @@ public class PlayerManager {
     public void registerTeams() {
         // Storyteller
         Team team = scoreboard.getTeam("botc_storyteller");
-        team = team !=null ? team: scoreboard.registerNewTeam("botc_storyteller");
+        team = team != null ? team : scoreboard.registerNewTeam("botc_storyteller");
         team.prefix(Component.text("[Storyteller]").color(NamedTextColor.LIGHT_PURPLE));
 
         // Spectators
         team = scoreboard.getTeam("botc_spectators");
-        team = team !=null ? team: scoreboard.registerNewTeam("botc_spectators");
+        team = team != null ? team : scoreboard.registerNewTeam("botc_spectators");
         team.prefix(Component.text("[Spectator]").color(NamedTextColor.GRAY));
+
+        team = scoreboard.getTeam("botc_ghosts");
+        team = team != null ? team : scoreboard.registerNewTeam("botc_ghosts");
+        team.prefix(Component.text("\uD83D\uDC7B").color(NamedTextColor.DARK_AQUA));
+        team.suffix(Component.text("\uD83D\uDC7B").color(NamedTextColor.DARK_AQUA));
     }
 
     public void registerObjectives() {
@@ -44,7 +48,7 @@ public class PlayerManager {
         if (objective == null) {
             scoreboard.registerNewObjective("botc_house_nr", Criteria.DUMMY, Component.text("House Numbers"));
         }
-         objective = scoreboard.getObjective("botc_vote_available");
+        objective = scoreboard.getObjective("botc_vote_available");
         if (objective == null) {
             scoreboard.registerNewObjective("botc_vote_available", Criteria.DUMMY, Component.text("Vote Available"));
         }
@@ -67,6 +71,7 @@ public class PlayerManager {
         Objective objective = scoreboard.getObjective("botc_vote_available");
         objective.getScore(player).setScore(vote.ordinal());
     }
+
     public static VoteType getVoteAvailable(OfflinePlayer player) {
         Objective objective = scoreboard.getObjective("botc_vote_available");
         return VoteType.values()[objective.getScore(player).getScore()];
@@ -75,7 +80,7 @@ public class PlayerManager {
     public static List<Integer> getPlayerNrs() {
         List<Integer> output = new ArrayList<>();
         Objective objective = scoreboard.getObjective("botc_house_nr");
-        for (String entry: scoreboard.getEntries()) {
+        for (String entry : scoreboard.getEntries()) {
             Score score = objective.getScore(entry);
             if (score.isScoreSet()) {
                 output.add(score.getScore());

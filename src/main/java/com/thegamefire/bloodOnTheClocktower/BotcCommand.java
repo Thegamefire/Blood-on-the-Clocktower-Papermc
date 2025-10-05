@@ -139,14 +139,16 @@ public class BotcCommand {
         Location loc = ctx.getArgument("location", BlockPositionResolver.class).resolve(ctx.getSource()).toLocation(Bukkit.getWorld("world"));
         int playerNr = IntegerArgumentType.getInteger(ctx, "player_number");
         VoteManager.addVoteBlock(playerNr, loc);
-        Bukkit.getConsoleSender().sendMessage(Component.text(String.format("Added VoteBlock at %g, %g, %g for player %d", loc.x(), loc.y(), loc.z(), playerNr)));
+        ctx.getSource().getSender().sendMessage(Component.text(String.format("Added VoteBlock at %g, %g, %g for player %d", loc.x(), loc.y(), loc.z(), playerNr)));
+        Bukkit.getConsoleSender().sendMessage(Component.text(String.format("[%s: Added VoteBlock at %g, %g, %g for player %d]", ctx.getSource().getSender().getName(), loc.x(), loc.y(), loc.z(), playerNr)));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int removeVoteBlock(CommandContext<CommandSourceStack> ctx) {
         int playerNr = IntegerArgumentType.getInteger(ctx, "player_number");
         VoteManager.removeVoteBlock(playerNr);
-        Bukkit.getConsoleSender().sendMessage(Component.text(String.format("Removed VoteBlock for player %d", playerNr)));
+        ctx.getSource().getSender().sendMessage(Component.text(String.format("Removed VoteBlock for player %d", playerNr)));
+        Bukkit.getConsoleSender().sendMessage(Component.text(String.format("[%s: Removed VoteBlock for player %d]", ctx.getSource().getSender().getName(), playerNr)));
         return Command.SINGLE_SUCCESS;
     }
 

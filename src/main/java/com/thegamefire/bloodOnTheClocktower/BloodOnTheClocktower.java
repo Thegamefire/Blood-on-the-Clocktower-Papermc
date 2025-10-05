@@ -1,5 +1,7 @@
 package com.thegamefire.bloodOnTheClocktower;
 
+import com.thegamefire.bloodOnTheClocktower.timer.TimerCommand;
+import com.thegamefire.bloodOnTheClocktower.timer.TimerRunner;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteLeverListener;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteManager;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteRunner;
@@ -30,9 +32,11 @@ public final class BloodOnTheClocktower extends JavaPlugin {
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, command -> {
             Commands commands = command.registrar();
             commands.register(BotcCommand.createCommand());
+            commands.register(TimerCommand.createCommand());
         });
         BukkitScheduler scheduler = this.getServer().getScheduler();
         scheduler.runTaskTimer(this, new VoteRunner(), 1, 20);
+        scheduler.runTaskTimer(this, new TimerRunner(), 1, 1);
     }
 
     @Override

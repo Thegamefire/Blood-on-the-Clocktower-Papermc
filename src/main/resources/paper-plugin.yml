@@ -1,4 +1,4 @@
 name: Blood-on-the-Clocktower
 version: '1.0-SNAPSHOT'
 main: com.thegamefire.bloodOnTheClocktower.BloodOnTheClocktower
-api-version: '1.21'
+api-version: '1.21.8'

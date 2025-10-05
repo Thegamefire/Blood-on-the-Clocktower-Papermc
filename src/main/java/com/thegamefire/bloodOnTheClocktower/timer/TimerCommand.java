@@ -12,7 +12,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 public class TimerCommand {
 
     public static LiteralCommandNode<CommandSourceStack> createCommand() {
-        return Commands.literal("timer")
+        return Commands.literal("timer-botc")
                 .then(Commands.literal("mins")
                         .then(Commands.argument("minutes", IntegerArgumentType.integer(1))
                                 .executes(TimerCommand::startTimerMins)))

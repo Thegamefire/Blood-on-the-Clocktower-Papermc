@@ -7,7 +7,7 @@ import java.util.Set;
 public enum VoteType {
     LIVING_VOTE(Material.WAXED_COPPER_BLOCK, Material.SHROOMLIGHT),
     GHOST_VOTE(Material.WAXED_OXIDIZED_COPPER, Material.SEA_LANTERN),
-    SPENT_GHOST_VOTE(Material.OBSIDIAN, null);
+    SPENT_GHOST_VOTE(Material.POLISHED_DEEPSLATE, null);
 
     public Material getVoteOnBlock() {
         return voteOnBlock;
@@ -42,7 +42,7 @@ public enum VoteType {
 
     public static VoteType fromBlock(Material block) {
         for (VoteType voteType : VoteType.values()) {
-            if (voteType.getVoteOnBlock().equals(block) || voteType.getVoteOffBlock().equals(block)) {
+            if ((voteType.getVoteOnBlock() != null && voteType.getVoteOnBlock().equals(block)) || voteType.getVoteOffBlock().equals(block)) {
                 return voteType;
             }
         }

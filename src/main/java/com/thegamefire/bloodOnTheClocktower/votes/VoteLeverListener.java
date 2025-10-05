@@ -1,6 +1,6 @@
-package com.thegamefire.bloodOnTheClocktower;
+package com.thegamefire.bloodOnTheClocktower.votes;
 
-import com.thegamefire.bloodOnTheClocktower.votes.VoteManager;
+import com.thegamefire.bloodOnTheClocktower.BloodOnTheClocktower;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -52,7 +52,7 @@ public class VoteLeverListener implements Listener {
         World world = Bukkit.getWorld("world");
         Map<Location, Integer> locations = new HashMap<>();
         String conf = world.getPersistentDataContainer().get(NamespacedKey.fromString("vote_levers", BloodOnTheClocktower.instance), PersistentDataType.STRING);
-        if (conf == null) {
+        if (conf == null || conf.isEmpty()) {
             return locations;
         }
         for (String locString : conf.split("§")) {

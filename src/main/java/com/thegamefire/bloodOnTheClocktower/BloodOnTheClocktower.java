@@ -1,5 +1,6 @@
 package com.thegamefire.bloodOnTheClocktower;
 
+import com.thegamefire.bloodOnTheClocktower.votes.VoteLeverListener;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteManager;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteRunner;
 import io.papermc.paper.command.brigadier.Commands;

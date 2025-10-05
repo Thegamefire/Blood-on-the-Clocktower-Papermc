@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.thegamefire.bloodOnTheClocktower.characters.BotcCharacter;
 import com.thegamefire.bloodOnTheClocktower.characters.BotcCharacterArgument;
+import com.thegamefire.bloodOnTheClocktower.votes.VoteLeverListener;
 import com.thegamefire.bloodOnTheClocktower.votes.VoteManager;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;

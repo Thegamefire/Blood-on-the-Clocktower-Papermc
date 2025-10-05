@@ -40,6 +40,9 @@ public class VoteManager {
         BloodOnTheClocktower.sendGlobal(
                 Component.text(getNecessaryVoteAmount()).color(NamedTextColor.AQUA)
                         .append(Component.text(" votes are necessary to mark for execution.").color(NamedTextColor.WHITE)));
+        for (Location loc : voteBlocks.values()) {
+            loc.clone().add(0, -2, 0).getBlock().setType(Material.REDSTONE_BLOCK);
+        }
     }
 
     public static void newDay() {
@@ -152,7 +155,7 @@ public class VoteManager {
         ((Directional) pistonBlockdata).setFacing(BlockFace.UP);
         location.clone().add(0, -1, 0).getBlock().setBlockData(pistonBlockdata);
         BloodOnTheClocktower.debugPublic("SetBlockFacing");
-        location.clone().add(0, -2, 0).getBlock().setType(Material.REDSTONE_BLOCK);
+        location.clone().add(0, -2, 0).getBlock().setType(Material.AIR);
         location.clone().add(0, -1, 0).getBlock().getState().update(true, true);
     }
 

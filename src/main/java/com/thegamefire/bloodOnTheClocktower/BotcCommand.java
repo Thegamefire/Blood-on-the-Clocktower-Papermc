@@ -85,7 +85,7 @@ public class BotcCommand {
             ctx.getSource().getSender().sendMessage(
                     Component.text(playerNr)
                             .append(Component.text(": "))
-                            .append(Component.text(String.format("%g, %g, %g", loc.x(), loc.y(), loc.z())))
+                            .append(Component.text(String.format("%.0f, %.0f, %.0f", loc.x(), loc.y(), loc.z())))
             );
         }
         return Command.SINGLE_SUCCESS;
@@ -139,8 +139,8 @@ public class BotcCommand {
         Location loc = ctx.getArgument("location", BlockPositionResolver.class).resolve(ctx.getSource()).toLocation(Bukkit.getWorld("world"));
         int playerNr = IntegerArgumentType.getInteger(ctx, "player_number");
         VoteManager.addVoteBlock(playerNr, loc);
-        ctx.getSource().getSender().sendMessage(Component.text(String.format("Added VoteBlock at %g, %g, %g for player %d", loc.x(), loc.y(), loc.z(), playerNr)));
-        Bukkit.getConsoleSender().sendMessage(Component.text(String.format("[%s: Added VoteBlock at %g, %g, %g for player %d]", ctx.getSource().getSender().getName(), loc.x(), loc.y(), loc.z(), playerNr)));
+        ctx.getSource().getSender().sendMessage(Component.text(String.format("Added VoteBlock at %.0f, %.0f, %.0f for player %d", loc.x(), loc.y(), loc.z(), playerNr)));
+        Bukkit.getConsoleSender().sendMessage(Component.text(String.format("[%s: Added VoteBlock at %.0f, %.0f, %.0f for player %d]", ctx.getSource().getSender().getName(), loc.x(), loc.y(), loc.z(), playerNr)));
         return Command.SINGLE_SUCCESS;
     }
 

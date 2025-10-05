@@ -2,6 +2,8 @@ package com.thegamefire.bloodOnTheClocktower.timer;
 
 import com.thegamefire.bloodOnTheClocktower.BloodOnTheClocktower;
 import com.thegamefire.bloodOnTheClocktower.PlayerManager;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -54,6 +56,12 @@ public class TimerRunner implements Runnable {
                     Math.abs(ticksLeft % 20) > 9 ?
                             BarColor.WHITE : BarColor.RED
             );
+            if (Math.abs(ticksLeft % 20) == 1 && Math.abs(ticksLeft / 20) < 4) {
+                Sound bellSound = Sound.sound(Key.key("block.bell.use"), Sound.Source.BLOCK, 0.08f, Math.abs(ticksLeft % 40) > 19 ? 1f : 0.5f);
+                for (Player player : bossBar.getPlayers()) {
+                    player.playSound(bellSound);
+                }
+            }
             bossBar.setTitle("Time's Up!");
             ticksLeft--;
         } else {

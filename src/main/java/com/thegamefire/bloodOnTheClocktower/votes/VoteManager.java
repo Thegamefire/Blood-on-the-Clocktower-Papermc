@@ -41,6 +41,12 @@ public class VoteManager {
                 Component.text(getNecessaryVoteAmount()).color(NamedTextColor.AQUA)
                         .append(Component.text(" votes are necessary to mark for execution.").color(NamedTextColor.WHITE)));
         for (Location loc : voteBlocks.values()) {
+            VoteType type = VoteType.fromBlock(loc.getBlock().getType());
+            if (type != null && type.getVoteOnBlock() == loc.getBlock().getType()) {
+                loc.getBlock().setType(
+                        type.spentVote().getVoteOffBlock()
+                );
+            }
             loc.clone().add(0, -2, 0).getBlock().setType(Material.REDSTONE_BLOCK);
         }
     }
@@ -79,10 +85,12 @@ public class VoteManager {
         if (type != null) {
             Material voteOnBlock = type.getVoteOnBlock() == null ? type.getVoteOffBlock() : type.getVoteOnBlock();
             voteBlock.getBlock().setType(
-                    (type.getVoteOnBlock() == blockType)
+                    (voteOnBlock == blockType)
                             ? type.getVoteOffBlock()
                             : voteOnBlock
             );
+            voteBlock.getBlock().getState().update(true, true);
+            voteBlock.clone().add(0, -2, 0).getBlock().getState().update(true, true);
             return true;
         }
         return false;
@@ -106,11 +114,6 @@ public class VoteManager {
         } else { // Base Case, a vote gets processed
             Block block = nextVoteBlock.clone().add(0, 1, 0).getBlock();
             if (VoteType.onBlockSet().contains(block.getType())) {
-                block.setType(
-                        VoteType.fromBlock(block.getType())
-                                .spentVote()
-                                .getVoteOffBlock()
-                );
                 nomineeScore++;
             }
             nextVoteBlock.clone().add(0, -2, 0).getBlock().setType(Material.AIR);
